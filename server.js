@@ -2,7 +2,17 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const path = require('path');
+const { logger } = require('./middleware/logger');
+const errorHandler = require('./middleware/errorHandler');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const corsOptions = require('./config/corsOptions');
 
+// middlewares
+app.use(logger);
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(cookieParser());
 // static files can be served in 2 ways
 // app.use('/', express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));
@@ -19,5 +29,8 @@ app.all('*', (req, res) => {
     res.status(404).type('txt').send('404 not found');
   }
 });
-s;
+
+// more middlewares
+app.use(errorHandler);
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

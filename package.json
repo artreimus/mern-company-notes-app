@@ -1,5 +1,5 @@
 {
-  "name": "mern-nodes-app",
+  "name": "copi",
   "version": "1.0.0",
   "description": "MERN Notes Application",
   "main": "server.js",
@@ -11,6 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2"
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "date-fns": "^2.29.3",
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
   }
 }
