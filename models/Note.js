@@ -5,16 +5,17 @@ const noteSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      required: [true, 'Please provide note user'],
       ref: 'User',
     },
     title: {
       type: String,
-      required: true,
+      required: [true, 'Please provide note title'],
+      unique: true,
     },
     text: {
       type: String,
-      required: true,
+      required: [true, 'Please provide note text'],
     },
     completed: {
       type: Boolean,

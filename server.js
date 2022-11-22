@@ -23,6 +23,10 @@ app.use(cookieParser());
 app.use(express.static('public'));
 
 app.use('/', require('./routes/root'));
+
+app.use('/api/v1/users', require('./routes/userRoutes'));
+app.use('/api/v1/notes', require('./routes/noteRoutes'));
+
 app.all('*', (req, res) => {
   // We can setup the status before sending the response
   // res.status(404)
