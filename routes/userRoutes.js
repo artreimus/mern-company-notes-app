@@ -7,6 +7,10 @@ const {
   deleteUser,
 } = require('../controllers/userControllers');
 
+const verifyJWT = require('../middleware/verifyJWT');
+
+// router.use(verifyJWT);
+
 router
   .route('/')
   .get(getAllUsers)
