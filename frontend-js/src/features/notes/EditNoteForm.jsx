@@ -31,7 +31,8 @@ const EditNoteForm = ({ note, users }) => {
 
   const onTitleChanged = (e) => setTitle(e.currentTarget.value);
   const onTextChanged = (e) => setText(e.currentTarget.value);
-  const onCompletedChanged = () => setCompleted(() => !prev);
+  const onCompletedChanged = () =>
+    setCompleted((prevCompleted) => !prevCompleted);
   const onUserIdChanged = (e) => setUserId(e.target.value);
 
   const canSave = [title, text, userId].every(Boolean) && !isLoading;
@@ -66,7 +67,6 @@ const EditNoteForm = ({ note, users }) => {
   const options = users.map((user) => {
     return (
       <option key={user.id} value={user.id}>
-        {' '}
         {user.username}
       </option>
     );
