@@ -8,7 +8,7 @@ import { ROLES } from '../../config/roles';
 const USER_REGEX = /^[A-z]{3,20}$/;
 const PWD_REGEX = /^[A-z0-9!@#$%]{4,12}$/;
 
-const EditUserForm = ({ user }: { user: any }) => {
+const EditUserForm = ({ user }) => {
   const [updateUser, { isLoading, isSuccess, isError, error }] =
     useUpdateUserMutation();
 
@@ -44,12 +44,10 @@ const EditUserForm = ({ user }: { user: any }) => {
     }
   }, [isSuccess, isDelSuccess, navigate]);
 
-  const onUsernameChanged = (e: React.FormEvent<HTMLInputElement>) =>
-    setUsername(e.currentTarget.value);
-  const onPasswordChanged = (e: React.FormEvent<HTMLInputElement>) =>
-    setPassword(e.currentTarget.value);
+  const onUsernameChanged = (e) => setUsername(e.currentTarget.value);
+  const onPasswordChanged = (e) => setPassword(e.currentTarget.value);
 
-  const onRolesChanged = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const onRolesChanged = (e) => {
     const values = Array.from(
       e.target.selectedOptions,
       (option) => option.value
@@ -58,9 +56,9 @@ const EditUserForm = ({ user }: { user: any }) => {
     setRoles(values);
   };
 
-  const onActiveChanged = () => setActive((prev: boolean) => !prev);
+  const onActiveChanged = () => setActive((prev) => !prev);
 
-  const onSaveUserClicked = async (e: React.SyntheticEvent) => {
+  const onSaveUserClicked = async (e) => {
     if (password) {
       await updateUser({ id: user.id, username, password, roles, active });
     } else {

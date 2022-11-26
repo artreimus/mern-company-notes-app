@@ -37,12 +37,10 @@ const NewUserForm = () => {
     }
   }, [isSuccess, navigate]);
 
-  const onUsernameChanged = (e: React.FormEvent<HTMLInputElement>): void =>
-    setUsername(e.currentTarget.value);
-  const onPasswordChanged = (e: React.FormEvent<HTMLInputElement>): void =>
-    setPassword(e.currentTarget.value);
+  const onUsernameChanged = (e) => setUsername(e.currentTarget.value);
+  const onPasswordChanged = (e) => setPassword(e.currentTarget.value);
 
-  const onRolesChanged = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const onRolesChanged = (e) => {
     const values = Array.from(
       e.target.selectedOptions, //HTMLCollection
       (option) => option.value
@@ -53,7 +51,7 @@ const NewUserForm = () => {
   const canSave =
     [roles.length, validUsername, validPassword].every(Boolean) && !isLoading;
 
-  const onSaveUserClicked = async (e: React.SyntheticEvent) => {
+  const onSaveUserClicked = async (e) => {
     e.preventDefault();
     if (canSave) {
       await addNewUser({ username, password, roles });

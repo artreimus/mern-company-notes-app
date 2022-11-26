@@ -18,7 +18,7 @@ const UsersList = () => {
 
   console.log(users);
 
-  let content: ReactElement | null = null;
+  let content = null;
   if (isLoading) content = <p>Loading...</p>;
   if (isError) {
     content = <p className="errMsg">{error?.data?.message}</p>;
@@ -28,7 +28,7 @@ const UsersList = () => {
     const { ids } = users;
 
     const tableContent = ids?.length
-      ? ids.map((userId: string) => <User key={userId} userId={userId} />)
+      ? ids.map((userId) => <User key={userId} userId={userId} />)
       : null;
 
     content = (

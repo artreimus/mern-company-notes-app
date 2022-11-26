@@ -1,4 +1,4 @@
-const NewNoteForm = ({ user }: { user: any }) => {
+const NewNoteForm = ({ user }) => {
   return <div></div>;
 };
 

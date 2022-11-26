@@ -16,7 +16,7 @@ const NotesList = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  let content: ReactElement | null;
+  let content = null;
 
   if (isLoading) content = <p>Loading...</p>;
 

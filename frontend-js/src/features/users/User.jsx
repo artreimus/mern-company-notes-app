@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectUserById } from './usersApiSlice';
 
-const User = ({ userId }: { userId: string }) => {
-  const user: unknown = useSelector((state) => selectUserById(state, userId));
+const User = ({ userId }) => {
+  const user = useSelector((state) => selectUserById(state, userId));
   const navigate = useNavigate();
 
   console.log(user.roles);

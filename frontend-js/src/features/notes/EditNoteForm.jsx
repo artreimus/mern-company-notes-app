@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
-const EditNoteForm = ({ note, users }: { note: any; users: any }) => {
+const EditNoteForm = ({ note, users }) => {
   const [updateNote, { isLoading, isSuccess, isError, error }] =
     useUpdateNoteMutation();
 
@@ -29,13 +29,10 @@ const EditNoteForm = ({ note, users }: { note: any; users: any }) => {
     }
   }, [isSuccess, isDelSuccess, navigate]);
 
-  const onTitleChanged = (e: React.FormEvent<HTMLInputElement>) =>
-    setTitle(e.currentTarget.value);
-  const onTextChanged = (e: React.FormEvent<HTMLInputElement>) =>
-    setText(e.currentTarget.value);
-  const onCompletedChanged = () => setCompleted((prev: boolean) => !prev);
-  const onUserIdChanged = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    setUserId(e.target.value);
+  const onTitleChanged = (e) => setTitle(e.currentTarget.value);
+  const onTextChanged = (e) => setText(e.currentTarget.value);
+  const onCompletedChanged = () => setCompleted(() => !prev);
+  const onUserIdChanged = (e) => setUserId(e.target.value);
 
   const canSave = [title, text, userId].every(Boolean) && !isLoading;
 

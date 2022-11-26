@@ -1,25 +1,8 @@
 import { createSelector, createEntityAdapter } from '@reduxjs/toolkit';
 import { apiSlice } from '../../app/api/apiSlice';
-import { RootState } from '../../app/store';
-
-type INotes = {
-  _id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  text: string;
-  ticket: number;
-  title: string;
-  __v: number;
-  completed: boolean;
-  user: {
-    __id: string;
-    username: string;
-  };
-};
 
 const notesAdapter = createEntityAdapter({
-  sortComparer: (a: INotes, b: INotes) => {
-    console.log(a);
+  sortComparer: (a, b) => {
     return a.completed === b.completed ? 0 : a.completed ? 1 : -1;
   },
 });
@@ -28,14 +11,14 @@ const initialState = notesAdapter.getInitialState();
 
 export const notesApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getNotes: builder.query<INotes[], void>({
+    getNotes: builder.query({
       query: () => '/notes',
-      validateStatus: (response: any, result: any) => {
+      validateStatus: (response, result) => {
         return response.status === 200 && !result.isError;
       },
-      transformResponse: (responseData: INotes[]) => {
+      transformResponse: (responseData) => {
         console.log(responseData);
-        const loadednotes = responseData.map((note: any) => {
+        const loadednotes = responseData.map((note) => {
           note.id = note._id;
           return note;
         });
@@ -47,7 +30,7 @@ export const notesApiSlice = apiSlice.injectEndpoints({
           // console.log('result: ', result);
           return [
             { type: 'note', id: 'LIST' },
-            ...result.ids.map((id: string) => ({ type: 'note', id })),
+            ...result.ids.map((id) => ({ type: 'note', id })),
           ];
         } else return [{ type: 'note', id: 'LIST' }];
       },
@@ -105,6 +88,6 @@ export const {
   selectById: selectNoteById,
   selectIds: selectNoteIds,
   // Pass in a selector that returns the notes slice of state
-} = notesAdapter.getSelectors<RootState>(
+} = notesAdapter.getSelectors(
   (state) => selectNotesData(state) ?? initialState
 );
