@@ -1,15 +1,17 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, Navigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useRefreshMutation } from './authApiSlice';
 import usePersist from '../../hooks/usePersist';
 import { useSelector } from 'react-redux';
 import { selectCurrentToken } from './authSlice';
+import { useNavigate } from 'react-router-dom';
 
 const PersistLogin = () => {
   const [persist] = usePersist();
   const token = useSelector(selectCurrentToken);
   const effectRan = useRef(false);
 
+  const navigate = useNavigate();
   const [trueSuccess, setTrueSuccess] = useState(false);
 
   const [refresh, { isUninitialized, isLoading, isSuccess, isError, error }] =
@@ -53,7 +55,7 @@ const PersistLogin = () => {
     console.log('error');
     content = (
       <p className="errmsg">
-        {error.data?.message}
+        {`${error?.data?.message} - `}{' '}
         <Link to="/login">Please login again</Link>.
       </p>
     );
