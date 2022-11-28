@@ -8,8 +8,6 @@ const NewNoteForm = ({ users }) => {
   const [addNewNote, { isLoading, isSuccess, isError, error }] =
     useAddNewNoteMutation();
 
-  console.log(users);
-
   const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
