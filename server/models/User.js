@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema(
   {
@@ -10,10 +11,23 @@ const userSchema = new mongoose.Schema(
         unique: true,
         collation: { locale: 'en', strength: 2 },
       },
+      trim: true,
+      minlength: 3,
+      maxlength: 50,
+    },
+    email: {
+      type: String,
+      unique: true,
+      validate: {
+        validator: validator.isEmail,
+        message: 'Please provide valid email',
+      },
     },
     password: {
       type: String,
       required: [true, 'Please provide user password'],
+      minlength: 6,
+      maxlength: 100,
     },
     roles: [
       {
@@ -26,6 +40,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    verificationToken: String,
+    isVerified: { type: Boolean, default: false },
+    verified: Date,
+    passwordToken: String,
+    passwordTokenExpirationDate: { type: Date },
   },
   { toJSON: { virtuals: { virtuals: true } }, toObject: { virtual: true } }
 );

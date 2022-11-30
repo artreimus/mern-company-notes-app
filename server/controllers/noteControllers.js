@@ -1,7 +1,8 @@
 const User = require('../models/User');
 const Note = require('../models/Note');
 const asyncHandler = require('express-async-handler');
-const bcrypt = require('bcrypt');
+const CustomError = require('../errors');
+const { StatusCodes } = require('http-status-codes');
 
 // @desc Get all notes
 // @route GET /notes
@@ -12,10 +13,10 @@ const getAllNotes = asyncHandler(async (req, res) => {
     .populate({ path: 'user', select: 'username' });
 
   if (!notes?.length) {
-    return res.status(400).json({ message: 'No notes found' });
+    throw new CustomError.NotFoundError('No notes found');
   }
 
-  res.json(notes);
+  res.status(StatusCodes.OK).json(notes);
 });
 
 // @desc Create new note
@@ -26,21 +27,25 @@ const createNote = asyncHandler(async (req, res) => {
 
   // Confirm data
   if (!user || !title || !text) {
-    return res.status(400).json({ message: 'All fields are required' });
+    throw new CustomError.BadRequestError(
+      'Please provide user, title, and text'
+    );
   }
 
   const isUserExist = await User.findById(user).exec();
 
   if (!isUserExist) {
-    return res.status(400).json({ message: 'User does not exist' });
+    throw new CustomError.NotFoundError(`No note with id: ${user}`);
   }
 
   const note = await Note.create({ user, title, text });
 
   if (note) {
-    return res.status(201).json({ message: 'New note created' });
+    return res
+      .status(StatusCodes.CREATED)
+      .json({ message: 'New note created' });
   } else {
-    return res.status(400).json({ message: 'Invalid note data received' });
+    throw new CustomError.BadRequestError('Please provide all fields');
   }
 });
 
@@ -51,19 +56,19 @@ const updateNote = asyncHandler(async (req, res) => {
   const { id, user, title, text, completed } = req.body;
 
   if (!id || !user || !title || !text || typeof completed !== 'boolean') {
-    return res.status(400).json({ message: 'All fields are required' });
+    throw new CustomError.BadRequestError('All fields are required');
   }
 
   const note = await Note.findById(id).exec();
 
   if (!note) {
-    return res.status(400).json({ message: 'Note not found' });
+    throw new CustomError.NotFoundError(`No note with id: ${id}`);
   }
 
   const isUserExist = await User.findById(user).exec();
 
   if (!isUserExist) {
-    return res.status(400).json({ message: 'User does not exist' });
+    throw new CustomError.NotFoundError(`No user with id: ${user}`);
   }
 
   note.user = user;
@@ -73,7 +78,7 @@ const updateNote = asyncHandler(async (req, res) => {
 
   const updatedNote = await note.save();
 
-  res.json({ message: `${updatedNote.title} updated` });
+  res.status(StatusCodes.OK).json({ message: `${updatedNote.title} updated` });
 });
 
 // @desc Delete a note
@@ -83,20 +88,20 @@ const deleteNote = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
   if (!id) {
-    return res.status(400).json({ message: 'Note ID required' });
+    throw new CustomError.BadRequestError('Please provider note ID');
   }
 
   const note = await Note.findById(id).exec();
 
   if (!note) {
-    return res.status(400).json({ message: 'Note not found' });
+    throw new CustomError.NotFoundError(`No note with id: ${id}`);
   }
 
   const result = await note.deleteOne();
 
   const reply = `Note '${result.title}' with ID ${result._id} deleted`;
 
-  res.json({ message: reply });
+  res.status(StatusCodes.OK).json({ message: reply });
 });
 
 module.exports = { getAllNotes, createNote, updateNote, deleteNote };

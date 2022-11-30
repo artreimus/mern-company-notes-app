@@ -2,9 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 5000;
-const path = require('path');
-const { logger, logEvents } = require('./middleware/logger');
-const errorHandler = require('./middleware/errorHandler');
+const { loggerMiddleware, logEvents } = require('./middleware/logger');
+const errorHandlerMiddleware = require('./middleware/errorHandler');
+const notFoundMiddleware = require('./middleware/notFound');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
@@ -14,7 +14,7 @@ const mongoose = require('mongoose');
 connectDB();
 
 // middlewares
-app.use(logger);
+app.use(loggerMiddleware);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
@@ -28,20 +28,9 @@ app.use('/api/v1/auth', require('./routes/authRoutes'));
 app.use('/api/v1/users', require('./routes/userRoutes'));
 app.use('/api/v1/notes', require('./routes/noteRoutes'));
 
-app.all('*', (req, res) => {
-  // We can setup the status before sending the response
-  // res.status(404)
-  if (req.accepts('html')) {
-    res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
-  } else if (req.accepts('json')) {
-    res.status(404).json({ message: '404 Not Found' });
-  } else {
-    res.status(404).type('txt').send('404 not found');
-  }
-});
-
 // more middlewares
-app.use(errorHandler);
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 mongoose.connection.once('open', () => {
   console.log('Connected to DB');

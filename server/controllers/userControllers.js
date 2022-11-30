@@ -1,7 +1,8 @@
 const User = require('../models/User');
 const Note = require('../models/Note');
 const asyncHandler = require('express-async-handler');
-const bcrypt = require('bcrypt');
+const CustomError = require('../errors');
+const { StatusCodes } = require('http-status-codes');
 
 // @desc Get all users
 // @route GET /users
@@ -10,9 +11,9 @@ const bcrypt = require('bcrypt');
 const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find().select('-password').lean().populate('notes'); // lean removes unecessary properties / methods from the object
   if (!users?.length) {
-    return res.status(400).json({ message: 'No users found' });
+    throw new CustomError.NotFoundError('No users found');
   }
-  res.status(200).json(users);
+  res.status(StatusCodes.OK).json(users);
 });
 
 // @desc Create a new user
@@ -23,7 +24,9 @@ const createUser = asyncHandler(async (req, res) => {
   const { username, password, roles } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ message: ' All fields are required' });
+    throw new CustomError.BadRequestError(
+      'Please provide username and password'
+    );
   }
 
   const userObject =
@@ -34,9 +37,11 @@ const createUser = asyncHandler(async (req, res) => {
   const user = await User.create(userObject);
 
   if (user) {
-    res.status(201).json({ message: `New user ${username} created` });
+    res
+      .status(StatusCodes.CREATED)
+      .json({ message: `New user ${username} created` });
   } else {
-    res.status(400).json({ message: 'Invalid user data received' });
+    throw new CustomError.BadRequestError('Please provide all fields');
   }
 });
 
@@ -54,13 +59,13 @@ const updateUser = asyncHandler(async (req, res) => {
     !roles.length ||
     typeof active !== 'boolean'
   ) {
-    return res.status(400).json({ message: ' All fields are required' });
+    throw new CustomError.BadRequestError('All fields are required');
   }
 
   const user = await User.findById(id).exec();
 
   if (!user) {
-    res.status(400).json({ message: 'User not found' });
+    throw new CustomError.NotFoundError(`No user with id: ${id}`);
   }
 
   user.username = username;
@@ -73,7 +78,9 @@ const updateUser = asyncHandler(async (req, res) => {
 
   const updateUser = await user.save();
 
-  res.status(200).json({ message: `${updateUser.username} updated` });
+  res
+    .status(StatusCodes.OK)
+    .json({ message: `${updateUser.username} updated` });
 });
 
 // @desc Delete a user
@@ -84,25 +91,29 @@ const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
   if (!id) {
-    return res.status(400).json({ message: 'User ID Required' });
+    throw new CustomError.BadRequestError('Please provide user ID');
   }
 
   const note = await Note.findOne({ user: id }).lean().exec();
 
   if (note) {
-    return res.status(400).json({ message: 'User has assigned notes' });
+    throw new CustomError.BadRequestError('User has assigned notes');
   }
 
   const user = await User.findById(id).exec();
 
   if (!user) {
-    return res.status(400).json({ message: 'User not found' });
+    throw new CustomError.NotFoundError(`No user with id: ${id}`);
   }
 
+  console.log(user.username, req.user);
+  if (user.username === req.user) {
+    throw new CustomError.BadRequestError('Error deleting own user');
+  }
   const result = await user.deleteOne();
   const message = `Username ${result.username} with ID ${result._id} deleted`;
 
-  res.status(200).json({ message });
+  res.status(StatusCodes.OK).json({ message });
 });
 
 module.exports = { getAllUsers, createUser, updateUser, deleteUser };
