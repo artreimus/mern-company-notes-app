@@ -1,4 +1,3 @@
-import { ReactElement } from 'react';
 import { useGetNotesQuery } from './notesApiSlice';
 import Note from './Note';
 import useAuth from '../../hooks/useAuth';
@@ -7,7 +6,7 @@ import useTitle from '../../hooks/useTitle';
 
 const NotesList = () => {
   useTitle('Copi');
-  const { username, isManager, isAdmin } = useTitle('Copi');
+  const { username, isManager, isAdmin } = useAuth();
   useAuth();
 
   const {
