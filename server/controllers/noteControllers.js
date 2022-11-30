@@ -35,7 +35,16 @@ const createNote = asyncHandler(async (req, res) => {
   const isUserExist = await User.findById(user).exec();
 
   if (!isUserExist) {
-    throw new CustomError.NotFoundError(`No note with id: ${user}`);
+    throw new CustomError.NotFoundError(`No user with id: ${user}`);
+  }
+
+  const duplicate = await Note.findOne({ title })
+    .collation({ locale: 'en', strength: 2 })
+    .lean()
+    .exec();
+
+  if (duplicate) {
+    throw new CustomError.ConflictError(`Note title ${title} already taken`);
   }
 
   const note = await Note.create({ user, title, text });
@@ -69,6 +78,15 @@ const updateNote = asyncHandler(async (req, res) => {
 
   if (!isUserExist) {
     throw new CustomError.NotFoundError(`No user with id: ${user}`);
+  }
+
+  const duplicate = await Note.findOne({ title })
+    .collation({ locale: 'en', strength: 2 })
+    .lean()
+    .exec();
+
+  if (duplicate._id.toString() !== id) {
+    throw new CustomError.ConflictError(`Note title ${title} already taken`);
   }
 
   note.user = user;

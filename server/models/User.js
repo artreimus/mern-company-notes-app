@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 
-const userSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -49,21 +49,21 @@ const userSchema = new mongoose.Schema(
   { toJSON: { virtuals: { virtuals: true } }, toObject: { virtual: true } }
 );
 
-userSchema.pre('save', async function () {
+UserSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-userSchema.virtual('notes', {
+UserSchema.virtual('notes', {
   ref: 'Note',
   localField: '_id',
   foreignField: 'user',
   justOne: false,
 });
 
-userSchema.methods.comparePassword = async function (candidatePassword) {
+UserSchema.methods.comparePassword = async function (candidatePassword) {
   const isMatch = await bcrypt.compare(candidatePassword, this.password);
   return isMatch;
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', UserSchema);

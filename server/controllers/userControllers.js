@@ -7,7 +7,6 @@ const { StatusCodes } = require('http-status-codes');
 // @desc Get all users
 // @route GET /users
 // @access Private
-
 const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find().select('-password').lean().populate('notes'); // lean removes unecessary properties / methods from the object
   if (!users?.length) {
@@ -19,7 +18,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @desc Create a new user
 // @route POST /users
 // @access Private
-
 const createUser = asyncHandler(async (req, res) => {
   const { username, password, roles } = req.body;
 
@@ -36,6 +34,15 @@ const createUser = asyncHandler(async (req, res) => {
 
   const user = await User.create(userObject);
 
+  const duplicate = await User.findOne({ username })
+    .collation({ locale: 'en', strength: 2 })
+    .lean()
+    .exec();
+
+  if (duplicate) {
+    throw new CustomError.ConflictError(`Username ${username} already taken`);
+  }
+
   if (user) {
     res
       .status(StatusCodes.CREATED)
@@ -51,7 +58,6 @@ const createUser = asyncHandler(async (req, res) => {
 const updateUser = asyncHandler(async (req, res) => {
   const { id, username, roles, active, password } = req.body;
 
-  console.log(roles);
   if (
     !id ||
     !username ||
@@ -66,6 +72,15 @@ const updateUser = asyncHandler(async (req, res) => {
 
   if (!user) {
     throw new CustomError.NotFoundError(`No user with id: ${id}`);
+  }
+
+  const duplicate = await User.findOne({ username })
+    .collation({ locale: 'en', strength: 2 })
+    .lean()
+    .exec();
+
+  if (duplicate._id.toString() !== id) {
+    throw new CustomError.ConflictError(`Username ${username} already taken`);
   }
 
   user.username = username;
@@ -86,7 +101,6 @@ const updateUser = asyncHandler(async (req, res) => {
 // @desc Delete a user
 // @route DELETE /users
 // @access Private
-
 const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
