@@ -17,7 +17,7 @@ connectDB();
 app.use(loggerMiddleware);
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser(process.env.COOKIE_SECRET));
 // static files can be served in 2 ways
 // app.use('/', express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));

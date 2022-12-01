@@ -11,8 +11,10 @@ const EditNote = () => {
   const { id } = useParams();
   const { username, isManager, isAdmin } = useAuth();
 
-  const { note } = useGetNotesQuery('notesList', {
-    selectFromResult: ({ data }) => ({
+  const { isLoading, note } = useGetNotesQuery('notesList', {
+    selectFromResult: ({ data, isLoading, isError }) => ({
+      isLoading,
+      isError,
       note: data?.entities[id],
     }),
   });
@@ -23,7 +25,11 @@ const EditNote = () => {
     }),
   });
 
-  if (!note || !users?.length) return <PulseLoader color={'#FFF'} />;
+  if (isLoading) return <PulseLoader color={'#FFF'} />;
+
+  if (!note) {
+    return <p className="errmsg">Invalid note id</p>;
+  }
 
   if (!isManager && !isAdmin) {
     if (note.username !== username) {

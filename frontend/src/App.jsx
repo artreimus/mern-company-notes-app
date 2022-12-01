@@ -15,6 +15,7 @@ import PersistLogin from './features/auth/PersistLogin';
 import { ROLES } from './config/roles';
 import RequireAuth from './features/auth/RequireAuth';
 import useTitle from './hooks/useTitle';
+import Missing from './components/Missing';
 
 function App() {
   useTitle('Copi');
@@ -57,6 +58,7 @@ function App() {
             </Route>
           </Route>
         </Route>
+        <Route path="*" element={<Missing />}></Route>
       </Route>
     </Routes>
   );

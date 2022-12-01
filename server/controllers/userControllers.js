@@ -15,6 +15,26 @@ const getAllUsers = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json(users);
 });
 
+// @desc Get single user
+// @route GET /users/:id
+// @access Private
+const getSingleUser = asyncHandler(async (req, res) => {
+  console.log('getting user.');
+  const user = await User.findOne({ _id: req.params.id })
+    .select('-password')
+    .lean()
+    .populate('notes');
+
+  if (!user) {
+    throw new CustomError.NotFoundError('User not found');
+  }
+
+  console.log(req.user);
+  // checkPermissions(req.user,user._id);
+
+  res.status(StatusCodes.OK).json({ user });
+});
+
 // @desc Create a new user
 // @route POST /users
 // @access Private
@@ -32,8 +52,6 @@ const createUser = asyncHandler(async (req, res) => {
       ? { username, password }
       : { username, roles, password };
 
-  const user = await User.create(userObject);
-
   const duplicate = await User.findOne({ username })
     .collation({ locale: 'en', strength: 2 })
     .lean()
@@ -42,6 +60,8 @@ const createUser = asyncHandler(async (req, res) => {
   if (duplicate) {
     throw new CustomError.ConflictError(`Username ${username} already taken`);
   }
+
+  const user = await User.create(userObject);
 
   if (user) {
     res
@@ -56,10 +76,10 @@ const createUser = asyncHandler(async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = asyncHandler(async (req, res) => {
-  const { id, username, roles, active, password } = req.body;
+  const { username, roles, active, password } = req.body;
+  const id = req.params.id;
 
   if (
-    !id ||
     !username ||
     !Array.isArray(roles) ||
     !roles.length ||
@@ -79,7 +99,7 @@ const updateUser = asyncHandler(async (req, res) => {
     .lean()
     .exec();
 
-  if (duplicate._id.toString() !== id) {
+  if (duplicate && duplicate?._id.toString() !== id) {
     throw new CustomError.ConflictError(`Username ${username} already taken`);
   }
 
@@ -102,7 +122,7 @@ const updateUser = asyncHandler(async (req, res) => {
 // @route DELETE /users
 // @access Private
 const deleteUser = asyncHandler(async (req, res) => {
-  const { id } = req.body;
+  const id = req.params.id;
 
   if (!id) {
     throw new CustomError.BadRequestError('Please provide user ID');
@@ -120,7 +140,6 @@ const deleteUser = asyncHandler(async (req, res) => {
     throw new CustomError.NotFoundError(`No user with id: ${id}`);
   }
 
-  console.log(user.username, req.user);
   if (user.username === req.user) {
     throw new CustomError.BadRequestError('Error deleting own user');
   }
@@ -130,4 +149,10 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ message });
 });
 
-module.exports = { getAllUsers, createUser, updateUser, deleteUser };
+module.exports = {
+  getAllUsers,
+  getSingleUser,
+  createUser,
+  updateUser,
+  deleteUser,
+};

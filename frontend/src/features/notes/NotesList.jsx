@@ -43,9 +43,11 @@ const NotesList = () => {
       );
     }
 
-    const tableContent =
-      filteredIds?.length &&
-      filteredIds.map((noteId) => <Note key={noteId} noteId={noteId} />);
+    console.log(filteredIds);
+
+    const tableContent = filteredIds?.length
+      ? filteredIds.map((noteId) => <Note key={noteId} noteId={noteId} />)
+      : null;
 
     content = (
       <table className="table table--notes">

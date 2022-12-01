@@ -7,15 +7,20 @@ import useTitle from '../../hooks/useTitle';
 const EditUser = () => {
   useTitle('Copi');
   const { id } = useParams();
-  const { user } = useGetUsersQuery('usersList', {
-    selectFromResult: ({ data }) => ({ user: data?.entities[id] }),
+  const { user, isLoading } = useGetUsersQuery('usersList', {
+    selectFromResult: ({ data, isLoading }) => ({
+      user: data?.entities[id],
+      isLoading,
+    }),
   });
 
-  const content = user ? (
-    <EditUserForm user={user} />
-  ) : (
-    <PulseLoader color={'#FFF'} />
-  );
+  if (isLoading) return <PulseLoader color={'#FFF'} />;
+
+  if (!user) {
+    return <p className="errmsg">Invalid user id</p>;
+  }
+
+  const content = <EditUserForm user={user} />;
 
   return content;
 };

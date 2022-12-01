@@ -18,8 +18,6 @@ const UsersList = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  console.log(users);
-
   let content = null;
   if (isLoading) content = <PulseLoader color={'#FFF'} />;
   if (isError) {

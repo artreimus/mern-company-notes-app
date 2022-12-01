@@ -105,7 +105,7 @@ const NewUserForm = () => {
         />
 
         <label className="form__label" htmlFor="password">
-          Password: <span className="nowrap">[4-12 chars incl. !@#$%]</span>
+          Password: <span className="nowrap">[6-12 chars incl. !@#$%]</span>
         </label>
         <input
           className={`form__input ${validPwdClass}`}
@@ -114,6 +114,7 @@ const NewUserForm = () => {
           type="password"
           value={password}
           onChange={onPasswordChanged}
+          min={6}
         />
 
         <label className="form__label" htmlFor="roles">

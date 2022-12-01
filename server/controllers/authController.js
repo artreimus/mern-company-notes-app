@@ -3,6 +3,12 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const CustomError = require('../errors');
 const { StatusCodes } = require('http-status-codes');
+const {
+  createTokenUser,
+  attachCookieToResponse,
+  createJWT,
+  checkCookies,
+} = require('../utils');
 
 // @desc Login
 // @route POST /auth
@@ -28,31 +34,15 @@ const login = asyncHandler(async (req, res) => {
   if (!isPasswordCorrect)
     throw new CustomError.UnauthorizedError('Invalid credentials');
 
-  const accessToken = jwt.sign(
-    {
-      UserInfo: {
-        username: foundUser.username,
-        roles: foundUser.roles,
-      },
-    },
+  const tokenUser = createTokenUser(foundUser);
+
+  const accessToken = createJWT(
+    { UserInfo: tokenUser },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: '15m' }
+    '15m'
   );
 
-  const refreshToken = jwt.sign(
-    {
-      username: foundUser.username,
-    },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: '7d' }
-  );
-
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true, // accessible only by web server
-    secure: true, // https
-    sameSite: 'None', // cross-site cookie
-    maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expiry set to match refreshToken
-  });
+  attachCookieToResponse({ res, user: tokenUser });
 
   res.status(StatusCodes.OK).json({ accessToken });
 });
@@ -62,13 +52,9 @@ const login = asyncHandler(async (req, res) => {
 // @access Public - because token has expired
 
 const refresh = asyncHandler(async (req, res) => {
-  const cookies = req.cookies;
+  const cookies = checkCookies(req);
 
-  if (!cookies?.jwt) {
-    throw new CustomError.UnauthorizedError('Invalid credentials');
-  }
-
-  const refreshToken = cookies.jwt;
+  const refreshToken = cookies.refreshToken;
 
   jwt.verify(
     refreshToken,
@@ -89,15 +75,11 @@ const refresh = asyncHandler(async (req, res) => {
           .json({ message: 'Invalid token. User not found' });
       }
 
-      const accessToken = jwt.sign(
-        {
-          UserInfo: {
-            username: foundUser.username,
-            roles: foundUser.roles,
-          },
-        },
+      const tokenUser = createTokenUser(foundUser);
+      const accessToken = createJWT(
+        { UserInfo: tokenUser },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '15m' }
+        '15m'
       );
 
       res.status(StatusCodes.OK).json({ accessToken });
@@ -110,11 +92,7 @@ const refresh = asyncHandler(async (req, res) => {
 // @access Public - just to clearn cookie if exists
 
 const logout = asyncHandler(async (req, res) => {
-  const cookies = req.cookies;
-
-  if (!cookies?.jwt) {
-    throw new CustomError.BadRequestError('No content');
-  }
+  const cookies = checkCookies(req);
 
   res.clearCookie('refreshToken', {
     httpOnly: true,

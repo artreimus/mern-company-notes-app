@@ -10,10 +10,12 @@ const useAuth = () => {
 
   if (token) {
     const decode = jwtDecode(token);
+    console.log('Decode:');
+    console.log(decode);
     const { username, roles } = decode.UserInfo;
 
-    isManager = roles.includes('Manager');
-    isAdmin = roles.includes('Admin');
+    isManager = roles?.includes('Manager');
+    isAdmin = roles?.includes('Admin');
 
     // Admin is the highest role
     if (isManager) status = 'Manager';

@@ -62,9 +62,10 @@ const createNote = asyncHandler(async (req, res) => {
 // @route PATCH /notes
 // @access Private
 const updateNote = asyncHandler(async (req, res) => {
-  const { id, user, title, text, completed } = req.body;
+  const { user, title, text, completed } = req.body;
+  const id = req.params.id;
 
-  if (!id || !user || !title || !text || typeof completed !== 'boolean') {
+  if (!user || !title || !text || typeof completed !== 'boolean') {
     throw new CustomError.BadRequestError('All fields are required');
   }
 
@@ -85,7 +86,7 @@ const updateNote = asyncHandler(async (req, res) => {
     .lean()
     .exec();
 
-  if (duplicate._id.toString() !== id) {
+  if (duplicate && duplicate?._id.toString() !== id) {
     throw new CustomError.ConflictError(`Note title ${title} already taken`);
   }
 
@@ -103,7 +104,7 @@ const updateNote = asyncHandler(async (req, res) => {
 // @route DELETE /notes
 // @access Private
 const deleteNote = asyncHandler(async (req, res) => {
-  const { id } = req.body;
+  const id = req.params.id;
 
   if (!id) {
     throw new CustomError.BadRequestError('Please provider note ID');

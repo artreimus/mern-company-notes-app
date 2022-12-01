@@ -373,3 +373,14 @@ tr {
     position: static;
   }
 }
+
+.center__all {
+  /* width: 100vw; */
+  height: 100vh;
+  display: flex;
+
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  /* align-items: center; */
+}
